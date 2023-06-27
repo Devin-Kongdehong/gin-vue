@@ -6,15 +6,16 @@ import (
 	"go-vue/control"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 	//"github.com/go-playground/locales/root"
 	//"github.com/jinzhu/gorm"
 )
 
 func main() {
 	db := common.InitDB()
-	defer db.Close()
-	fmt.Println("begin")
+	fmt.Println(db.Config)
 	r := gin.Default()
-	r.GET("/api/auth/register", control.Rrgister)
-	r.Run() // 监听并在 0.0.0.0:8080 上启动服务
+	r.POST("/api/auth/register", control.Rrgister)
+	r.POST("/api/auth/login", control.Login)
+	r.Run()
 }

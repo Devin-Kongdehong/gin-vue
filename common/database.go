@@ -4,27 +4,32 @@ import (
 	"fmt"
 	"go-vue/model"
 
-	"github.com/jinzhu/gorm"
+	//_ "github.com/go-sql-driver/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	//"github.com/jinzhu/gorm"
 )
 
 var DB *gorm.DB
 
 func InitDB() *gorm.DB {
-	driverName := "mysql"
+	fmt.Print(1)
 	host := "localhost"
 	port := "3306"
-	database := "go-vue"
+	database := "mysql"
 	username := "root"
 	password := "123456"
-	charset := "utf8"
-	args := fmt.Sprintf("%s:%stcp(%s:%s)/%s?charset=%sparseTime=true",
+	charset := "utf8mb4"
+	//dsn := "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=true&loc=Local",
 		username,
 		password,
 		host,
 		port,
 		database,
 		charset)
-	db, err := gorm.Open(driverName, args)
+	//gorm.Open(sqlite.Open(args), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database, err:" + err.Error())
 	}

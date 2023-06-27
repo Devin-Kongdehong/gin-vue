@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func Rrgister(c *gin.Context) {
@@ -30,17 +31,58 @@ func Rrgister(c *gin.Context) {
 	if len(name) == 0 {
 		name = util.RandomString(10)
 	}
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "加密错误"})
+	}
 
 	//创建用户
 	user := model.User{
 		Name:      name,
 		Telephone: telephone,
-		Password:  password,
+		Password:  string(hashPassword),
 	}
 	db.Create(&user)
 
 	//返回结果
 	c.JSON(200, gin.H{
+		"code":    200,
 		"message": "注册成功",
 	})
+}
+
+func Login(c *gin.Context) {
+	DB := common.GetDB()
+	telephone := c.PostForm("telephone")
+	password := c.PostForm("password")
+	//数据验证
+	if len(telephone) != 11 {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "手机号为11位"})
+	}
+	if len(password) < 6 {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "密码不小于6位"})
+	}
+
+	//判断用户是否存在和密码是否正确
+	var user model.User
+	DB.Where("telephone = ?", telephone).First(&user)
+
+	if user.ID == 0 {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "用户不存在"})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(password), []byte(user.Password)); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "密码不正确"})
+		return
+	}
+
+	//返回
+	token := 11
+	c.JSON(200, gin.H{
+		"code":    200,
+		"data":    gin.H{"token": token},
+		"message": "注册成功",
+	})
+
 }

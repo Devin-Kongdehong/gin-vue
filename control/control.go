@@ -2,6 +2,7 @@ package control
 
 import (
 	"go-vue/common"
+	"go-vue/dto"
 	"go-vue/model"
 	"go-vue/util"
 	"log"
@@ -97,6 +98,6 @@ func Info(ctx *gin.Context) {
 	user, _ := ctx.Get("user")
 	ctx.JSON(http.StatusOK, gin.H{
 		"code": 200,
-		"data": gin.H{"user": user},
+		"data": gin.H{"user": dto.ToUserDto(user.(model.User))},//控制不输出敏感信息
 	})
 }

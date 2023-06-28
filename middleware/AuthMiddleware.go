@@ -58,7 +58,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		//用户存在 将user信息写入上下文
 		ctx.Set("user", user)
-
+		//传递给下一个中间件
 		ctx.Next()
 	}
 }
